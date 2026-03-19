@@ -1,0 +1,10 @@
+CompileFlags:
+  Add:
+    - -I./include
+    - -DMODERN
+    - -DREVISION=0
+    - -target
+    - arm-none-eabi
+  Remove:
+    - -mthumb-interwork
+    - -mabi=apcs-gnu

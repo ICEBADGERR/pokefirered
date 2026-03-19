@@ -1,0 +1,95 @@
+#ifdef PLATFORM_PC
+
+#include <SDL2/SDL.h>
+#include <stdint.h>
+
+typedef uint8_t  u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+
+#define GBA_WIDTH  240
+#define GBA_HEIGHT 160
+#define SCALE      3
+
+SDL_Window   *gWindow   = NULL;
+SDL_Renderer *gRenderer = NULL;
+SDL_Texture  *gTexture  = NULL;
+
+// This is the framebuffer — game rendering code will write GBA RGB555 pixels here
+u16 gFramebuffer[GBA_WIDTH * GBA_HEIGHT];
+
+// Convert GBA RGB555 to ARGB8888
+static u32 RGB555toARGB(u16 color)
+{
+    u8 r = (color >>  0) & 0x1F;
+    u8 g = (color >>  5) & 0x1F;
+    u8 b = (color >> 10) & 0x1F;
+    // Scale 5-bit to 8-bit
+    r = (r << 3) | (r >> 2);
+    g = (g << 3) | (g >> 2);
+    b = (b << 3) | (b >> 2);
+    return (0xFF << 24) | (r << 16) | (g << 8) | b;
+}
+
+static void RenderFramebuffer(void)
+{
+    u32 pixels[GBA_WIDTH * GBA_HEIGHT];
+    for (int i = 0; i < GBA_WIDTH * GBA_HEIGHT; i++)
+        pixels[i] = RGB555toARGB(gFramebuffer[i]);
+
+    SDL_UpdateTexture(gTexture, NULL, pixels, GBA_WIDTH * sizeof(u32));
+    SDL_RenderClear(gRenderer);
+    SDL_RenderCopy(gRenderer, gTexture, NULL, NULL);
+    SDL_RenderPresent(gRenderer);
+}
+
+int main(int argc, char *argv[])
+{
+    SDL_Init(SDL_INIT_VIDEO);
+
+    gWindow = SDL_CreateWindow(
+        "Pokemon FireRed PC",
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        GBA_WIDTH * SCALE, GBA_HEIGHT * SCALE,
+        SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
+    );
+
+    gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
+
+    // Scale renderer output to fill window
+    SDL_RenderSetLogicalSize(gRenderer, GBA_WIDTH, GBA_HEIGHT);
+
+    gTexture = SDL_CreateTexture(
+        gRenderer,
+        SDL_PIXELFORMAT_ARGB8888,
+        SDL_TEXTUREACCESS_STREAMING,
+        GBA_WIDTH, GBA_HEIGHT
+    );
+
+    // Fill framebuffer with a test gradient so we know it's working
+    for (int y = 0; y < GBA_HEIGHT; y++)
+        for (int x = 0; x < GBA_WIDTH; x++)
+            gFramebuffer[y * GBA_WIDTH + x] = (x / 8) | ((y / 5) << 5);
+
+    SDL_Event event;
+    int running = 1;
+
+    while (running)
+    {
+        while (SDL_PollEvent(&event))
+            if (event.type == SDL_QUIT)
+                running = 0;
+
+        RenderFramebuffer();
+        SDL_Delay(16);
+    }
+
+    SDL_DestroyTexture(gTexture);
+    SDL_DestroyRenderer(gRenderer);
+    SDL_DestroyWindow(gWindow);
+    SDL_Quit();
+    return 0;
+}
+
+#endif // PLATFORM_PC
