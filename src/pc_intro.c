@@ -10,6 +10,9 @@
 #include "task.h"
 #include "scanline_effect.h"
 #include "gpu_regs.h"
+#include "new_menu_helpers.h"
+#include "bg.h"
+#include "malloc.h"
 
 extern u16 gFramebuffer[];
 #define GBA_WIDTH  240
@@ -20,14 +23,69 @@ typedef struct { u8 gcmb_field_2; } GcmbStruct;
 static GcmbStruct sGcmb = {0};
 static void GameCubeMultiBoot_Init(GcmbStruct *s) {}
 static void GameCubeMultiBoot_Main(GcmbStruct *s) {}
-static void GameCubeMultiBoot_ExecuteProgram(GcmbStruct *s) {}
 static void GameCubeMultiBoot_Quit(void) {}
 static void ResetSerial(void) {}
 static void SerialCB(void) {}
 static void SerialCB_CopyrightScreen(void) {}
 static void VBlankCB_Copyright(void) {}
+static void VBlankCB_Intro(void) {}
 static void LoadCopyrightGraphics(u32 a, u32 b, u32 c) {}
-static void CB2_WaitFadeBeforeSetUpIntro(void) { SetMainCallback2(CB2_WaitFadeBeforeSetUpIntro); }
+
+static void CB2_WaitFadeBeforeSetUpIntro(void);
+static void CB2_SetUpIntro(void);
+static void CB2_Intro(void);
+
+static void CB2_WaitFadeBeforeSetUpIntro(void)
+{
+    if (!UpdatePaletteFade())
+        SetMainCallback2(CB2_SetUpIntro);
+}
+
+static void CB2_SetUpIntro(void)
+{
+    switch (gMain.state)
+    {
+    default:
+        gMain.state = 0;
+        // fallthrough
+    case 0:
+        SetVBlankCallback(NULL);
+        SetGpuReg(REG_OFFSET_DISPCNT, 0);
+        InitHeap(gHeap, HEAP_SIZE);
+        ResetTasks();
+        ResetSpriteData();
+        ResetPaletteFade();
+        ResetTempTileDataBuffers();
+        ScanlineEffect_Stop();
+        FreeAllSpritePalettes();
+        ResetBgsAndClearDma3BusyFlags(FALSE);
+        gMain.state++;
+        break;
+    case 1:
+        // Skip loading GF logo graphics for now
+        gMain.state++;
+        break;
+    case 2:
+        // Skip waiting for DMA
+        BlendPalettes(PALETTES_ALL, 16, RGB_BLACK);
+        SetMainCallback2(CB2_Intro);
+        SetVBlankCallback(VBlankCB_Intro);
+        return;
+    }
+}
+
+static void CB2_Intro(void)
+{
+    RunTasks();
+    AnimateSprites();
+    BuildOamBuffer();
+    UpdatePaletteFade();
+
+    // Fill with a color to show we've reached CB2_Intro
+    u16 i;
+    for (i = 0; i < GBA_WIDTH * GBA_HEIGHT; i++)
+        gFramebuffer[i] = 0x001F; // red in RGB555
+}
 
 static bool8 SetUpCopyrightScreen(void)
 {
