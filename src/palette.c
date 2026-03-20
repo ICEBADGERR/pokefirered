@@ -1,3 +1,4 @@
+#ifndef PLATFORM_PC
 #include "global.h"
 #include "gflib.h"
 #include "util.h"
@@ -992,3 +993,4 @@ static void Task_BlendPalettesGradually(u8 taskId)
         }
     }
 }
+#endif
