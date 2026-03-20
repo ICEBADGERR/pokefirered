@@ -1,11 +1,24 @@
 #ifdef PLATFORM_PC
 
 #include <SDL2/SDL.h>
-#include <stdint.h>
+#include "pc_port.h"
 
-typedef uint8_t  u8;
-typedef uint16_t u16;
-typedef uint32_t u32;
+// -------------------------------------------------------
+// GBA hardware register definitions (stubs)
+// -------------------------------------------------------
+u16 PC_REG_DISPCNT   = 0;
+u16 PC_REG_DISPSTAT  = 0;
+u16 PC_REG_VCOUNT    = 0;
+u16 PC_REG_WAITCNT   = 0;
+u16 PC_REG_KEYINPUT  = 0x03FF; // all buttons released (GBA active-low)
+u16 PC_REG_IME       = 0;
+u16 PC_REG_IE        = 0;
+u16 PC_REG_IF        = 0;
+u16 PC_REG_TM1CNT_L  = 0;
+u16 PC_REG_TM1CNT_H  = 0;
+u32 PC_INTR_CHECK    = 0;
+u32 PC_INTR_VECTOR   = 0;
+u16 PC_BG_PLTT[256]  = {0};
 
 #define GBA_WIDTH  240
 #define GBA_HEIGHT 160
@@ -15,16 +28,13 @@ SDL_Window   *gWindow   = NULL;
 SDL_Renderer *gRenderer = NULL;
 SDL_Texture  *gTexture  = NULL;
 
-// This is the framebuffer — game rendering code will write GBA RGB555 pixels here
 u16 gFramebuffer[GBA_WIDTH * GBA_HEIGHT];
 
-// Convert GBA RGB555 to ARGB8888
 static u32 RGB555toARGB(u16 color)
 {
     u8 r = (color >>  0) & 0x1F;
     u8 g = (color >>  5) & 0x1F;
     u8 b = (color >> 10) & 0x1F;
-    // Scale 5-bit to 8-bit
     r = (r << 3) | (r >> 2);
     g = (g << 3) | (g >> 2);
     b = (b << 3) | (b >> 2);
@@ -56,8 +66,6 @@ int main(int argc, char *argv[])
     );
 
     gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
-
-    // Scale renderer output to fill window
     SDL_RenderSetLogicalSize(gRenderer, GBA_WIDTH, GBA_HEIGHT);
 
     gTexture = SDL_CreateTexture(
@@ -67,7 +75,7 @@ int main(int argc, char *argv[])
         GBA_WIDTH, GBA_HEIGHT
     );
 
-    // Fill framebuffer with a test gradient so we know it's working
+    // Test gradient
     for (int y = 0; y < GBA_HEIGHT; y++)
         for (int x = 0; x < GBA_WIDTH; x++)
             gFramebuffer[y * GBA_WIDTH + x] = (x / 8) | ((y / 5) << 5);
