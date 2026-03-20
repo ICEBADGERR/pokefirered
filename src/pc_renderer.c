@@ -17,7 +17,7 @@ extern u16 gFramebuffer[];
 static void PC_RenderBG_4bpp(u8 charBase, u8 screenBase)
 {
     u8  *tileData = gVRAM + (charBase * 0x4000);
-    u16 *tileMap  = (u16 *)(gVRAM + 0x10000 + (screenBase * 0x800));
+    u16 *tileMap  = (u16 *)(gVRAM + (screenBase * 0x800));
 
     for (int ty = 0; ty < TILES_Y; ty++)
     {
@@ -51,7 +51,7 @@ static void PC_RenderBG_4bpp(u8 charBase, u8 screenBase)
 static void PC_RenderBG_8bpp(u8 charBase, u8 screenBase)
 {
     u8  *tileData = gVRAM + (charBase * 0x4000);
-    u16 *tileMap  = (u16 *)(gVRAM + 0x10000 + (screenBase * 0x800));
+    u16 *tileMap  = (u16 *)(gVRAM + (screenBase * 0x800));
 
     for (int ty = 0; ty < TILES_Y; ty++)
     {
@@ -78,6 +78,10 @@ static void PC_RenderBG_8bpp(u8 charBase, u8 screenBase)
     }
 }
 
+// Screen base offsets matching sBgTemplates
+// charBase N = VRAM offset N*0x4000
+// mapBase N  = VRAM offset N*0x800
+// BG0: char=0, map=31  BG1: char=1, map=30  BG2: char=2, map=29  BG3: char=3, map=28
 void PC_RenderFrame(void)
 {
     // Clear to backdrop color (palette[0])
@@ -85,11 +89,11 @@ void PC_RenderFrame(void)
     for (int i = 0; i < GBA_WIDTH * GBA_HEIGHT; i++)
         gFramebuffer[i] = backdrop;
 
-    // Render BG layers back to front (lower priority first)
-    PC_RenderBG_4bpp(3, 3); // BG3 border (lowest)
-    PC_RenderBG_4bpp(2, 2); // BG2 copyright/press start
-    PC_RenderBG_4bpp(1, 1); // BG1 box art mon (Charizard)
-    PC_RenderBG_8bpp(0, 0); // BG0 game title logo (highest, 8bpp)
+    // Render BG layers back to front using correct char/screen bases
+    PC_RenderBG_4bpp(3, 28); // BG3 border (lowest priority)
+    PC_RenderBG_4bpp(2, 29); // BG2 copyright/press start
+    PC_RenderBG_4bpp(1, 30); // BG1 box art mon (Charizard)
+    PC_RenderBG_8bpp(0, 31); // BG0 game title logo (8bpp, highest priority)
 }
 
 #endif // PLATFORM_PC

@@ -62,6 +62,9 @@ static void PC_LoadPalFile(const char *path, u16 palOffset)
     }
 }
 
+// Screen base offsets matching sBgTemplates: BG0=31, BG1=30, BG2=29, BG3=28
+static const u8 sScreenBases[] = {31, 30, 29, 28};
+
 static void PC_LoadTiles(const char *path, u8 bgId)
 {
     u32 size;
@@ -70,7 +73,7 @@ static void PC_LoadTiles(const char *path, u8 bgId)
         u8 *dest = gVRAM + (bgId * 0x4000);
         LZ77UnCompWram(data, dest);
         free(data);
-        SDL_Log("Loaded tiles: %s bgId=%u", path, bgId);
+        SDL_Log("Loaded tiles: %s bgId=%u at VRAM offset 0x%X", path, bgId, bgId * 0x4000);
     }
 }
 
@@ -79,10 +82,11 @@ static void PC_LoadTilemap(const char *path, u8 bgId)
     u32 size;
     u8 *data = PC_LoadFile(path, &size);
     if (data) {
-        u8 *dest = gVRAM + 0x10000 + (bgId * 0x800);
+        u32 offset = sScreenBases[bgId] * 0x800;
+        u8 *dest = gVRAM + offset;
         LZ77UnCompWram(data, dest);
         free(data);
-        SDL_Log("Loaded tilemap: %s bgId=%u", path, bgId);
+        SDL_Log("Loaded tilemap: %s bgId=%u at VRAM offset 0x%X", path, bgId, offset);
     }
 }
 
@@ -145,7 +149,10 @@ void CB2_InitTitleScreen(void)
         gMain.state++;
         break;
     case 2:
-        SDL_Log("CB2_InitTitleScreen state 2 -> CB2_TitleScreenRun");
+        // Set backdrop color to sky color (palette 15, color 15 = orange-red)
+        gPlttBufferFaded[0] = gPlttBufferFaded[15 * 16 + 15];
+        gPlttBufferUnfaded[0] = gPlttBufferUnfaded[15 * 16 + 15];
+        SDL_Log("CB2_InitTitleScreen state 2 -> CB2_TitleScreenRun, backdrop=0x%04X", gPlttBufferFaded[0]);
         BlendPalettes(PALETTES_BG, 16, RGB_BLACK);
         CreateTask(Task_TitleScreenMain, 4);
         SetVBlankCallback(VBlankCB);
