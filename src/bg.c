@@ -1,3 +1,4 @@
+#ifndef PLATFORM_PC
 #include <limits.h>
 #include "global.h"
 #include "bg.h"
@@ -1213,3 +1214,4 @@ bool32 IsTileMapOutsideWram(u8 bg)
         return TRUE;
     return FALSE;
 }
+#endif
