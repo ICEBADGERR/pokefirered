@@ -1,3 +1,4 @@
+#ifndef PLATFORM_PC
 #include "global.h"
 
 #define GPU_REG_BUF_SIZE 0x60
@@ -156,3 +157,4 @@ static void UpdateRegDispstatIntrBits(u16 regIE)
 	if (oldValue != newValue)
 		SetGpuReg(REG_OFFSET_DISPSTAT, newValue);
 }
+#endif
