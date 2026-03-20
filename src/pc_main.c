@@ -36,6 +36,7 @@ u16 gFramebuffer[GBA_WIDTH * GBA_HEIGHT];
 void InitMainCallbacks(void);
 
 void PC_CallCallbacks(void);
+void PC_RunFrame(void);
 
 static u32 RGB555toARGB(u16 color)
 {
@@ -97,6 +98,7 @@ int main(int argc, char *argv[])
                 running = 0;
 
         // Tick the game state machine
+        PC_RunFrame();
         PC_CallCallbacks();
 
         RenderFramebuffer();
