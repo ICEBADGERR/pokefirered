@@ -1,3 +1,4 @@
+#ifndef PLATFORM_PC
 #include "global.h"
 #include "gflib.h"
 #include "m4a.h"
@@ -2794,3 +2795,4 @@ static void LoadFightSceneSpriteGraphics(void)
         LoadCompressedSpriteSheet(&sFightSceneSpriteSheets[i]);
     LoadSpritePalettes(sFightSceneSpritePalettes);
 }
+#endif

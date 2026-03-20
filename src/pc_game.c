@@ -41,15 +41,4 @@ void PC_CallCallbacks(void)
         gallback2();
 }
 
-extern u16 gFramebuffer[];
-#define GBA_WIDTH  240
-#define GBA_HEIGHT 160
-
-void CB2_InitCopyrightScreenAfterBootup(void)
-{
-    for (int i = 0; i < GBA_WIDTH * GBA_HEIGHT; i++)
-        gFramebuffer[i] = (31 << 10);
-    SetMainCallback2(CB2_InitCopyrightScreenAfterBootup);
-}
-
 #endif // PLATFORM_PC
