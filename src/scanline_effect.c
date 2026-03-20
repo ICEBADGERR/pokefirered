@@ -1,3 +1,4 @@
+#ifndef PLATFORM_PC
 #include "global.h"
 #include "task.h"
 #include "trig.h"
@@ -259,3 +260,5 @@ u8 ScanlineEffect_InitWave(u8 startLine, u8 endLine, u8 frequency, u8 amplitude,
 
     return taskId;
 }
+#endif // PLATFORM_PC
+#endif // PLATFORM_PC

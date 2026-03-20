@@ -64,5 +64,24 @@ extern u16 PC_REG_TM1CNT_H;
 #define AGB_ASSERT_EX(exp, file, line) ((void)0)
 
 
+// DMA + REG_ADDR constants needed by scanline_effect.h
+#define REG_ADDR_BG0HOFS 0
+#define REG_ADDR_BG0VOFS 2
+#define REG_ADDR_BG1HOFS 4
+#define REG_ADDR_BG1VOFS 6
+#define REG_ADDR_BG2HOFS 8
+#define REG_ADDR_BG2VOFS 10
+#define REG_ADDR_BG3HOFS 12
+#define REG_ADDR_BG3VOFS 14
+#define DMA_ENABLE        0x8000
+#define DMA_START_HBLANK  0x2000
+#define DMA_START_VBLANK  0x1000
+#define DMA_REPEAT        0x0200
+#define DMA_SRC_INC       0x0000
+#define DMA_DEST_INC      0x0000
+#define DMA_DEST_RELOAD   0x0060
+#define DMA_16BIT         0x0000
+#define DMA_32BIT         0x0400
+
 #endif // PLATFORM_PC
 #endif // GUARD_PC_PORT_H
