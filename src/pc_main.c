@@ -3,6 +3,7 @@
 #include <SDL2/SDL.h>
 #include "pc_port.h"
 #include "main.h"
+#include "malloc.h"
 
 // -------------------------------------------------------
 // GBA hardware register definitions (stubs)
@@ -82,6 +83,7 @@ int main(int argc, char *argv[])
     );
 
     // Initialize the game callback system
+    InitHeap(gHeap, HEAP_SIZE);
     InitMainCallbacks();
     PC_RegisterTestCallback();
 

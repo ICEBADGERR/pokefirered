@@ -60,5 +60,9 @@ extern u16 PC_REG_TM1CNT_H;
 #define DmaCopy32(ch,src,dst,s) memcpy(dst, src, s)
 #define CpuFill16(val,dst,size) memset(dst, val, size)
 
+#define CpuFill32(value, dest, size) memset(dest, value, size)
+#define AGB_ASSERT_EX(exp, file, line) ((void)0)
+#define ABSPATH(x) x
+
 #endif // PLATFORM_PC
 #endif // GUARD_PC_PORT_H

@@ -2,6 +2,7 @@
 
 #include "global.h"
 #include "main.h"
+#include "malloc.h"
 
 // Globals needed by the callback system
 MainCallback gallback1 = NULL;
@@ -9,6 +10,8 @@ MainCallback gallback2 = NULL;
 struct Main gMain = {0};
 struct SaveBlock2 *gSaveBlock2Ptr = NULL;
 struct SaveBlock1 *gSaveBlock1Ptr = NULL;
+
+u8 gHeap[HEAP_SIZE];
 
 void SetMainCallback2(MainCallback callback)
 {
