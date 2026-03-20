@@ -42,6 +42,7 @@ void InitMainCallbacks(void);
 
 void PC_CallCallbacks(void);
 void PC_RunFrame(void);
+void PC_RenderFrame(void);
 
 static u32 RGB555toARGB(u16 color)
 {
@@ -105,6 +106,7 @@ int main(int argc, char *argv[])
         // Tick the game state machine
         PC_RunFrame();
         PC_CallCallbacks();
+        PC_RenderFrame();
 
         RenderFramebuffer();
         SDL_Delay(16);
