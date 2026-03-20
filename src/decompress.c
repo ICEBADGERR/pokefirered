@@ -1,3 +1,4 @@
+#ifndef PLATFORM_PC
 #include "global.h"
 #include "gflib.h"
 #include "decompress.h"
@@ -350,3 +351,4 @@ void LoadSpecialPokePic_DontHandleDeoxys(const struct CompressedSpriteSheet *src
     }
     DrawSpindaSpots(species, personality, dest, isFrontPic);
 }
+#endif

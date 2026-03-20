@@ -4,9 +4,15 @@
 #include "global.h"
 
 #define HEAP_SIZE 0x1C000
+#ifndef PLATFORM_PC
 #define malloc Alloc
+#endif
+#ifndef PLATFORM_PC
 #define calloc(ct, sz) AllocZeroed((ct) * (sz))
+#endif
+#ifndef PLATFORM_PC
 #define free Free
+#endif
 
 #define FREE_AND_SET_NULL(ptr)          \
 {                                       \

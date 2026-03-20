@@ -13,12 +13,13 @@
 #include "new_menu_helpers.h"
 #include "bg.h"
 #include "malloc.h"
+#include <SDL2/SDL.h>
+
 
 extern u16 gFramebuffer[];
 #define GBA_WIDTH  240
 #define GBA_HEIGHT 160
 
-// GameCube multiboot stubs
 typedef struct { u8 gcmb_field_2; } GcmbStruct;
 static GcmbStruct sGcmb = {0};
 static void GameCubeMultiBoot_Init(GcmbStruct *s) {}
@@ -38,7 +39,10 @@ static void CB2_Intro(void);
 static void CB2_WaitFadeBeforeSetUpIntro(void)
 {
     if (!UpdatePaletteFade())
+    {
+        SDL_Log("-> CB2_SetUpIntro");
         SetMainCallback2(CB2_SetUpIntro);
+    }
 }
 
 static void CB2_SetUpIntro(void)
@@ -47,8 +51,8 @@ static void CB2_SetUpIntro(void)
     {
     default:
         gMain.state = 0;
-        // fallthrough
     case 0:
+        SDL_Log("CB2_SetUpIntro state 0");
         SetVBlankCallback(NULL);
         SetGpuReg(REG_OFFSET_DISPCNT, 0);
         InitHeap(gHeap, HEAP_SIZE);
@@ -62,11 +66,11 @@ static void CB2_SetUpIntro(void)
         gMain.state++;
         break;
     case 1:
-        // Skip loading GF logo graphics for now
+        SDL_Log("CB2_SetUpIntro state 1");
         gMain.state++;
         break;
     case 2:
-        // Skip waiting for DMA
+        SDL_Log("CB2_SetUpIntro state 2 -> CB2_Intro");
         BlendPalettes(PALETTES_ALL, 16, RGB_BLACK);
         SetMainCallback2(CB2_Intro);
         SetVBlankCallback(VBlankCB_Intro);
@@ -76,15 +80,20 @@ static void CB2_SetUpIntro(void)
 
 static void CB2_Intro(void)
 {
+    static int frameCount = 0;
+    if (frameCount == 0)
+        SDL_Log("CB2_Intro running!");
+    frameCount++;
+
     RunTasks();
     AnimateSprites();
     BuildOamBuffer();
     UpdatePaletteFade();
 
-    // Fill with a color to show we've reached CB2_Intro
+    // Red screen placeholder
     u16 i;
     for (i = 0; i < GBA_WIDTH * GBA_HEIGHT; i++)
-        gFramebuffer[i] = 0x001F; // red in RGB555
+        gFramebuffer[i] = 0x001F;
 }
 
 static bool8 SetUpCopyrightScreen(void)
@@ -92,6 +101,7 @@ static bool8 SetUpCopyrightScreen(void)
     switch (gMain.state)
     {
     case 0:
+        SDL_Log("SetUpCopyrightScreen state 0");
         SetVBlankCallback(NULL);
         SetGpuReg(REG_OFFSET_DISPCNT, 0);
         ResetPaletteFade();
@@ -111,6 +121,7 @@ static bool8 SetUpCopyrightScreen(void)
             gMain.state = 142;
         break;
     case 142:
+        SDL_Log("SetUpCopyrightScreen -> CB2_WaitFadeBeforeSetUpIntro");
         SetMainCallback2(CB2_WaitFadeBeforeSetUpIntro);
         return FALSE;
     }
