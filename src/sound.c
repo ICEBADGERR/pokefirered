@@ -1,3 +1,4 @@
+#ifndef PLATFORM_PC
 #include "global.h"
 #include "gba/m4a_internal.h"
 #include "gflib.h"
@@ -647,3 +648,4 @@ void BGMVolumeMax_EnableHelpSystemReduction(void)
     gDisableHelpSystemVolumeReduce = FALSE;
     m4aMPlayVolumeControl(&gMPlayInfo_BGM, TRACKS_ALL, 256);
 }
+#endif

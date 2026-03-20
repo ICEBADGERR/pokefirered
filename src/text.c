@@ -1,3 +1,4 @@
+#ifndef PLATFORM_PC
 #include "global.h"
 #include "gflib.h"
 #include "m4a.h"
@@ -1693,3 +1694,4 @@ static void DecompressGlyph_Bold(u16 glyphId)
     gGlyphInfo.width = 8;
     gGlyphInfo.height = 12;
 }
+#endif

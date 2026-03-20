@@ -1,3 +1,4 @@
+#ifndef PLATFORM_PC
 #include "global.h"
 #include "gflib.h"
 
@@ -511,3 +512,4 @@ static u8 GetNumActiveWindowsOnBg(u8 bgId)
     }
     return windowsNum;
 }
+#endif
