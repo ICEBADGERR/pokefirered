@@ -12,11 +12,14 @@
 #include "gpu_regs.h"
 #include "new_menu_helpers.h"
 #include "bg.h"
+#include "decompress.h"
 #include "malloc.h"
 #include <SDL2/SDL.h>
-
+#include <stdio.h>
+#include <stdlib.h>
 
 extern u16 gFramebuffer[];
+extern u8 gVRAM[];
 #define GBA_WIDTH  240
 #define GBA_HEIGHT 160
 
@@ -30,7 +33,43 @@ static void SerialCB(void) {}
 static void SerialCB_CopyrightScreen(void) {}
 static void VBlankCB_Copyright(void) {}
 static void VBlankCB_Intro(void) {}
-static void LoadCopyrightGraphics(u32 a, u32 b, u32 c) {}
+
+static u8 *PC_LoadFile(const char *path, u32 *size)
+{
+    FILE *f = fopen(path, "rb");
+    if (!f) { SDL_Log("Failed to open %s", path); return NULL; }
+    fseek(f, 0, SEEK_END);
+    *size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    u8 *buf = (u8 *)malloc(*size);
+    fread(buf, 1, *size, f);
+    fclose(f);
+    return buf;
+}
+
+static void LoadCopyrightGraphics(u32 charBase, u32 screenBase, u32 palOffset)
+{
+    u32 size;
+    u8 *gfx = PC_LoadFile("graphics/intro/copyright.4bpp.lz", &size);
+    u8 *map = PC_LoadFile("graphics/intro/copyright.bin.lz", &size);
+    u8 *pal = PC_LoadFile("graphics/intro/copyright.gbapal", &size);
+    SDL_Log("About to decompress gfx=%p map=%p pal=%p", (void*)gfx, (void*)map, (void*)pal);
+    if (gfx) { SDL_Log("Decompressing GFX..."); LZ77UnCompWram(gfx, gVRAM + charBase); free(gfx); }
+    if (map) { SDL_Log("Decompressing MAP..."); LZ77UnCompWram(map, gVRAM + screenBase); free(map); }
+
+    if (pal) {
+        memcpy(gPlttBufferFaded   + palOffset, pal, size);
+        memcpy(gPlttBufferUnfaded + palOffset, pal, size);
+        free(pal);
+    }
+    SDL_Log("LoadCopyrightGraphics done: charBase=%u screenBase=%u", charBase, screenBase);
+    SDL_Log("VRAM[0..7]: %02X %02X %02X %02X %02X %02X %02X %02X",
+        gVRAM[0], gVRAM[1], gVRAM[2], gVRAM[3],
+        gVRAM[4], gVRAM[5], gVRAM[6], gVRAM[7]);
+    SDL_Log("VRAM screenBase[0..3]: %02X %02X %02X %02X",
+        gVRAM[7*0x800], gVRAM[7*0x800+1], gVRAM[7*0x800+2], gVRAM[7*0x800+3]);
+    SDL_Log("Palette[0]=%04X [1]=%04X [2]=%04X", gPlttBufferFaded[0], gPlttBufferFaded[1], gPlttBufferFaded[2]);
+}
 
 static void CB2_WaitFadeBeforeSetUpIntro(void);
 static void CB2_SetUpIntro(void);
@@ -78,22 +117,28 @@ static void CB2_SetUpIntro(void)
     }
 }
 
+extern void PC_RenderFrame(void);
+
 static void CB2_Intro(void)
 {
     static int frameCount = 0;
     if (frameCount == 0)
+    {
         SDL_Log("CB2_Intro running!");
+        // Check if VRAM has data
+        u32 nonzero = 0;
+        for (int i = 0; i < 1248; i++)
+            if (gVRAM[i]) nonzero++;
+        SDL_Log("VRAM non-zero bytes in first 1248: %u", nonzero);
+        // Check palette
+        SDL_Log("Palette[0]=%04X Palette[1]=%04X", gPlttBufferFaded[0], gPlttBufferFaded[1]);
+    }
     frameCount++;
-
     RunTasks();
     AnimateSprites();
     BuildOamBuffer();
     UpdatePaletteFade();
-
-    // Red screen placeholder
-    u16 i;
-    for (i = 0; i < GBA_WIDTH * GBA_HEIGHT; i++)
-        gFramebuffer[i] = 0x001F;
+    PC_RenderFrame();
 }
 
 static bool8 SetUpCopyrightScreen(void)
@@ -105,7 +150,7 @@ static bool8 SetUpCopyrightScreen(void)
         SetVBlankCallback(NULL);
         SetGpuReg(REG_OFFSET_DISPCNT, 0);
         ResetPaletteFade();
-        LoadCopyrightGraphics(0, 0, 0);
+        LoadCopyrightGraphics(0, 7 * 0x800, 0);
         ScanlineEffect_Stop();
         ResetTasks();
         ResetSpriteData();

@@ -113,5 +113,9 @@ extern u8 gPLTT[PC_PLTT_SIZE];
 #define REG_OFFSET_BG0HOFS  0x10
 #define REG_OFFSET_BG0VOFS  0x12
 
+// LZ77 decompression declarations
+void LZ77UnCompWram(const void *src, void *dest);
+void LZ77UnCompVram(const void *src, void *dest);
+
 #endif // PLATFORM_PC
 #endif // GUARD_PC_PORT_H
