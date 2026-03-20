@@ -83,5 +83,27 @@ extern u16 PC_REG_TM1CNT_H;
 #define DMA_16BIT         0x0000
 #define DMA_32BIT         0x0400
 
+// VRAM/OAM stubs
+#undef VRAM
+#define VRAM 0
+#undef OAM
+#define OAM 0
+#undef VRAM_SIZE
+#define VRAM_SIZE 0
+#undef OAM_SIZE
+#define OAM_SIZE 0
+#define DmaFill16(ch, val, dst, size) memset((void*)(dst), val, size)
+#define DmaFill32(ch, val, dst, size) memset((void*)(dst), val, size)
+
+// REG_OFFSET constants for display registers
+#define REG_OFFSET_DISPCNT  0x0
+#define REG_OFFSET_DISPSTAT 0x4
+#define REG_OFFSET_BLDCNT   0x50
+#define REG_OFFSET_BLDALPHA 0x52
+#define REG_OFFSET_BLDY     0x54
+#define REG_OFFSET_BG0CNT   0x8
+#define REG_OFFSET_BG0HOFS  0x10
+#define REG_OFFSET_BG0VOFS  0x12
+
 #endif // PLATFORM_PC
 #endif // GUARD_PC_PORT_H

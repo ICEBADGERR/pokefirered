@@ -41,4 +41,9 @@ void PC_CallCallbacks(void)
         gallback2();
 }
 
+void SetVBlankCallback(IntrCallback callback) { gMain.vblankCallback = callback; }
+void SetHBlankCallback(IntrCallback callback) { gMain.hblankCallback = callback; }
+void SetSerialCallback(IntrCallback callback) { gMain.serialCallback = callback; }
+void SetVCountCallback(IntrCallback callback) { gMain.vcountCallback = callback; }
+
 #endif // PLATFORM_PC
