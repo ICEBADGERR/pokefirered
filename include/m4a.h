@@ -1,7 +1,14 @@
 #ifndef GUARD_M4A_H
 #define GUARD_M4A_H
 
+#ifndef PLATFORM_PC
 #include "gba/m4a_internal.h"
+#else
+// Minimal stubs for m4a structs on PC
+struct MusicPlayerInfo { u8 dummy[128]; };
+struct SoundInfo { u32 pcmDmaCounter; u8 dummy[256]; };
+struct SongHeader { u8 dummy[32]; };
+#endif
 
 void m4aSoundVSync(void);
 void m4aSoundVSyncOn(void);
