@@ -3,8 +3,8 @@
 #include "global.h"
 #include "main.h"
 #include "malloc.h"
+#include "intro.h"
 
-// Globals needed by the callback system
 MainCallback gallback1 = NULL;
 MainCallback gallback2 = NULL;
 struct Main gMain = {0};
@@ -24,8 +24,7 @@ void InitMainCallbacks(void)
     gMain.vblankCounter1 = 0;
     gMain.vblankCounter2 = 0;
     gallback1 = NULL;
-    // Don't call CB2_InitCopyrightScreenAfterBootup yet
-    // SetMainCallback2(CB2_InitCopyrightScreenAfterBootup);
+    SetMainCallback2(CB2_InitCopyrightScreenAfterBootup);
 }
 
 void PC_CallCallbacks(void)
@@ -36,26 +35,19 @@ void PC_CallCallbacks(void)
         gallback2();
 }
 
-#endif // PLATFORM_PC
-
-#ifdef PLATFORM_PC
-// Test callback - draws a red screen to prove the callback system works
+// Stub out CB2_InitCopyrightScreenAfterBootup for now
+// Draws a blue screen so we know it's being called
 extern u16 gFramebuffer[];
 #define GBA_WIDTH  240
 #define GBA_HEIGHT 160
 
-static void TestCallback(void)
+void CB2_InitCopyrightScreenAfterBootup(void)
 {
-    // Fill framebuffer with red (RGB555: r=31, g=0, b=0)
+    // blue in RGB555: b=31
     for (int i = 0; i < GBA_WIDTH * GBA_HEIGHT; i++)
-        gFramebuffer[i] = 31; // pure red in RGB555
+        gFramebuffer[i] = (31 << 10);
 
-    // Register ourselves again next frame
-    SetMainCallback2(TestCallback);
+    SetMainCallback2(CB2_InitCopyrightScreenAfterBootup);
 }
 
-void PC_RegisterTestCallback(void)
-{
-    SetMainCallback2(TestCallback);
-}
-#endif
+#endif // PLATFORM_PC

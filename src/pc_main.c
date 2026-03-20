@@ -34,7 +34,7 @@ u16 gFramebuffer[GBA_WIDTH * GBA_HEIGHT];
 
 // Declared in pc_game.c
 void InitMainCallbacks(void);
-void PC_RegisterTestCallback(void);
+
 void PC_CallCallbacks(void);
 
 static u32 RGB555toARGB(u16 color)
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
     // Initialize the game callback system
     InitHeap(gHeap, HEAP_SIZE);
     InitMainCallbacks();
-    PC_RegisterTestCallback();
+    
 
     SDL_Event event;
     int running = 1;
