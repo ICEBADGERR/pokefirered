@@ -85,15 +85,23 @@ extern u16 PC_REG_TM1CNT_H;
 
 // VRAM/OAM stubs
 #undef VRAM
-#define VRAM 0
+#define VRAM ((u32)(uintptr_t)gVRAM)
 #undef OAM
-#define OAM 0
+#define OAM ((u32)(uintptr_t)gOAM)
 #undef VRAM_SIZE
-#define VRAM_SIZE 0
+#define VRAM_SIZE PC_VRAM_SIZE
 #undef OAM_SIZE
-#define OAM_SIZE 0
+#define OAM_SIZE PC_OAM_SIZE
 #define DmaFill16(ch, val, dst, size) memset((void*)(dst), val, size)
 #define DmaFill32(ch, val, dst, size) memset((void*)(dst), val, size)
+
+#define PC_VRAM_SIZE 0x18000
+#define PC_OAM_SIZE  0x400
+#define PC_PLTT_SIZE 0x400
+
+extern u8 gVRAM[PC_VRAM_SIZE];
+extern u8 gOAM[PC_OAM_SIZE];
+extern u8 gPLTT[PC_PLTT_SIZE];
 
 // REG_OFFSET constants for display registers
 #define REG_OFFSET_DISPCNT  0x0

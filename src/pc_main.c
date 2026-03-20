@@ -22,6 +22,11 @@ u32 PC_INTR_CHECK    = 0;
 u32 PC_INTR_VECTOR   = 0;
 u16 PC_BG_PLTT[256]  = {0};
 
+// Simulated GBA memory
+u8 gVRAM[0x18000] = {0};
+u8 gOAM[0x400]    = {0};
+u8 gPLTT[0x400]   = {0};
+
 #define GBA_WIDTH  240
 #define GBA_HEIGHT 160
 #define SCALE      3
