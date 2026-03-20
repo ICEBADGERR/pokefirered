@@ -1,3 +1,4 @@
+#ifndef PLATFORM_PC
 #include "global.h"
 #include "gflib.h"
 #include "help_message.h"
@@ -759,3 +760,4 @@ u8 GetMenuCursorDimensionByFont(u8 fontId, u8 whichDimension)
 {
     return gMenuCursorDimensions[fontId][whichDimension];
 }
+#endif
