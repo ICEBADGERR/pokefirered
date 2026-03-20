@@ -1,8 +1,13 @@
 #ifndef GUARD_GLOBAL_H
 #define GUARD_GLOBAL_H
 
+#ifdef PLATFORM_PC
+#include "pc_port.h"
+#endif
 #include "config.h"
+#ifndef PLATFORM_PC
 #include "gba/gba.h"
+#endif
 #include <string.h>
 #include "constants/global.h"
 #include "constants/flags.h"
