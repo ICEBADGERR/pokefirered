@@ -2,6 +2,7 @@
 
 #include <SDL2/SDL.h>
 #include "pc_port.h"
+#include "main.h"
 
 // -------------------------------------------------------
 // GBA hardware register definitions (stubs)
@@ -29,6 +30,11 @@ SDL_Renderer *gRenderer = NULL;
 SDL_Texture  *gTexture  = NULL;
 
 u16 gFramebuffer[GBA_WIDTH * GBA_HEIGHT];
+
+// Declared in pc_game.c
+void InitMainCallbacks(void);
+void PC_RegisterTestCallback(void);
+void PC_CallCallbacks(void);
 
 static u32 RGB555toARGB(u16 color)
 {
@@ -75,10 +81,9 @@ int main(int argc, char *argv[])
         GBA_WIDTH, GBA_HEIGHT
     );
 
-    // Test gradient
-    for (int y = 0; y < GBA_HEIGHT; y++)
-        for (int x = 0; x < GBA_WIDTH; x++)
-            gFramebuffer[y * GBA_WIDTH + x] = (x / 8) | ((y / 5) << 5);
+    // Initialize the game callback system
+    InitMainCallbacks();
+    PC_RegisterTestCallback();
 
     SDL_Event event;
     int running = 1;
@@ -88,6 +93,9 @@ int main(int argc, char *argv[])
         while (SDL_PollEvent(&event))
             if (event.type == SDL_QUIT)
                 running = 0;
+
+        // Tick the game state machine
+        PC_CallCallbacks();
 
         RenderFramebuffer();
         SDL_Delay(16);
