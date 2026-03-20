@@ -68,9 +68,9 @@ static void PC_RenderBG_8bpp(u8 charBase, u8 screenBase)
                     u8 colorIndex = tile[py * 8 + px];
                     int screenX = tx * TILE_SIZE + px;
                     int screenY = ty * TILE_SIZE + py;
-                    if (colorIndex == 0)
-                        gFramebuffer[screenY * GBA_WIDTH + screenX] = gPlttBufferFaded[0];
-                    else
+                    // In 8bpp mode, color 0 is transparent (show what is behind)
+                    // Don't overwrite existing pixel if colorIndex is 0
+                    if (colorIndex != 0)
                         gFramebuffer[screenY * GBA_WIDTH + screenX] = gPlttBufferFaded[colorIndex];
                 }
             }
@@ -80,12 +80,16 @@ static void PC_RenderBG_8bpp(u8 charBase, u8 screenBase)
 
 void PC_RenderFrame(void)
 {
-    // Render BG layers back to front
-    // BG3 first (lowest priority), then BG2, BG1, BG0 (highest)
-    PC_RenderBG_4bpp(3, 3); // border
-    PC_RenderBG_4bpp(2, 2); // copyright/press start
-    PC_RenderBG_4bpp(1, 1); // box art mon
-    PC_RenderBG_8bpp(0, 0); // game title logo (8bpp)
+    // Clear to backdrop color (palette[0])
+    u16 backdrop = gPlttBufferFaded[0];
+    for (int i = 0; i < GBA_WIDTH * GBA_HEIGHT; i++)
+        gFramebuffer[i] = backdrop;
+
+    // Render BG layers back to front (lower priority first)
+    PC_RenderBG_4bpp(3, 3); // BG3 border (lowest)
+    PC_RenderBG_4bpp(2, 2); // BG2 copyright/press start
+    PC_RenderBG_4bpp(1, 1); // BG1 box art mon (Charizard)
+    PC_RenderBG_8bpp(0, 0); // BG0 game title logo (highest, 8bpp)
 }
 
 #endif // PLATFORM_PC

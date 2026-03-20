@@ -37,6 +37,19 @@ static u8 *PC_LoadFile(const char *path, u32 *size)
     return buf;
 }
 
+static void PC_LoadPalFileSize(const char *path, u16 palOffset, u32 maxSize)
+{
+    u32 size;
+    u8 *pal = PC_LoadFile(path, &size);
+    if (pal) {
+        if (size > maxSize) size = maxSize;
+        memcpy(gPlttBufferFaded   + palOffset, pal, size);
+        memcpy(gPlttBufferUnfaded + palOffset, pal, size);
+        free(pal);
+        SDL_Log("Loaded palette (capped): %s offset=%u size=%u", path, palOffset, size);
+    }
+}
+
 static void PC_LoadPalFile(const char *path, u16 palOffset)
 {
     u32 size;
@@ -112,19 +125,21 @@ void CB2_InitTitleScreen(void)
         return;
     case 1:
         SDL_Log("CB2_InitTitleScreen state 1 - loading graphics");
-        // BG0 - Game title logo (8bpp)
-        PC_LoadPalFile("graphics/title_screen/firered/game_title_logo.gbapal", 0);
+        // BG0 - Game title logo (8bpp) - uses 13 palettes starting at 0
+        // Load only 13*32=416 bytes (13 palettes x 16 colors x 2 bytes)
+        PC_LoadPalFileSize("graphics/title_screen/firered/game_title_logo.gbapal", 0, 13 * 32);
         PC_LoadTiles("graphics/title_screen/firered/game_title_logo.8bpp.lz", 0);
         PC_LoadTilemap("graphics/title_screen/firered/game_title_logo.bin.lz", 0);
-        // BG1 - Box art mon (Charizard)
+        // BG1 - Box art mon (Charizard) - palette 13
         PC_LoadPalFile("graphics/title_screen/firered/box_art_mon.gbapal", 13 * 16);
         PC_LoadTiles("graphics/title_screen/firered/box_art_mon.4bpp.lz", 1);
         PC_LoadTilemap("graphics/title_screen/firered/box_art_mon.bin.lz", 1);
-        // BG2 - Copyright/Press Start
+        // BG2 - Copyright/Press Start - palette 15
         PC_LoadPalFile("graphics/title_screen/firered/background.gbapal", 15 * 16);
         PC_LoadTiles("graphics/title_screen/copyright_press_start.4bpp.lz", 2);
         PC_LoadTilemap("graphics/title_screen/copyright_press_start.bin.lz", 2);
-        // BG3 - Border
+        // BG3 - Border - palette 14
+        PC_LoadPalFile("graphics/title_screen/firered/background.gbapal", 14 * 16);
         PC_LoadTiles("graphics/title_screen/border_bg.4bpp.lz", 3);
         PC_LoadTilemap("graphics/title_screen/firered/border_bg.bin.lz", 3);
         gMain.state++;
