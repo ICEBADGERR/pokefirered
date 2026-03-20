@@ -1,3 +1,4 @@
+#ifndef PLATFORM_PC
 #include "global.h"
 #include "gflib.h"
 
@@ -720,3 +721,4 @@ void StripExtCtrlCodes(u8 *str)
     }
     str[destIndex] = 0xFF;
 }
+#endif
