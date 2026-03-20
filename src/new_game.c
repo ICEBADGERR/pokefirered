@@ -1,3 +1,4 @@
+#ifndef PLATFORM_PC
 #include "global.h"
 #include "gflib.h"
 #include "random.h"
@@ -158,3 +159,4 @@ static void ResetMiniGamesResults(void)
     ResetPokemonJumpRecords();
     CpuFill16(0, &gSaveBlock2Ptr->berryPick, sizeof(struct BerryPickingResults));
 }
+#endif

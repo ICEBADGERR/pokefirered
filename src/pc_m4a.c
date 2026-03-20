@@ -25,3 +25,4 @@ void m4aMPlayFadeIn(struct MusicPlayerInfo *mplayInfo, u16 speed) {}
 void m4aMPlayImmInit(struct MusicPlayerInfo *mplayInfo) {}
 
 #endif // PLATFORM_PC
+void SetPokemonCryStereo(u32 val) {}
