@@ -1,3 +1,4 @@
+#ifndef PLATFORM_PC
 #include "global.h"
 #include "save.h"
 #include "decompress.h"
@@ -933,3 +934,4 @@ void Task_LinkFullSave(u8 taskId)
         break;
     }
 }
+#endif
