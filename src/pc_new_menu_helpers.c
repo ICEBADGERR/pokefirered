@@ -1,6 +1,7 @@
 #ifdef PLATFORM_PC
 
 #include "global.h"
+#include "decompress.h"
 #include "new_menu_helpers.h"
 
 void ClearScheduledBgCopiesToVram(void) {}
@@ -20,8 +21,26 @@ void AddTextPrinterForMessage(bool8 allowSkippingDelayWithButtonPress) {}
 
 bool8 FreeTempTileDataBuffersIfPossible(void) { return FALSE; }
 
-void *DecompressAndCopyTileDataToVram(u8 bgId, const void *src, u32 size, u16 offset, u8 mode) { return NULL; }
-void *DecompressAndCopyTileDataToVram2(u8 bgId, const void *src, u32 size, u16 offset, u8 mode) { return NULL; }
+// VRAM layout: each BG uses charBase and screenBase from BG control
+// mode 0 = tiles (charBase), mode 1 = tilemap (screenBase)
+// For now use fixed offsets per bgId
+void *DecompressAndCopyTileDataToVram(u8 bgId, const void *src, u32 size, u16 offset, u8 mode)
+{
+    extern u8 gVRAM[];
+    if (!src) return NULL;
+    // Each BG char base is 0x4000 apart, screen base is 0x800 apart
+    u8 *dest;
+    if (mode == 0) // tiles
+        dest = gVRAM + (bgId * 0x4000) + offset;
+    else // tilemap
+        dest = gVRAM + 0x10000 + (bgId * 0x800) + offset;
+    LZ77UnCompWram(src, dest);
+    return dest;
+}
+void *DecompressAndCopyTileDataToVram2(u8 bgId, const void *src, u32 size, u16 offset, u8 mode)
+{
+    return DecompressAndCopyTileDataToVram(bgId, src, size, offset, mode);
+}
 void *MallocAndDecompress(const void *src, u32 *size) { return NULL; }
 
 u16 RunTextPrinters_CheckPrinter0Active(void) { return 0; }

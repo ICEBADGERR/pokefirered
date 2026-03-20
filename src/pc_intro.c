@@ -12,6 +12,7 @@
 #include "gpu_regs.h"
 #include "new_menu_helpers.h"
 #include "bg.h"
+#include "title_screen.h"
 #include "decompress.h"
 #include "malloc.h"
 #include <SDL2/SDL.h>
@@ -109,10 +110,8 @@ static void CB2_SetUpIntro(void)
         gMain.state++;
         break;
     case 2:
-        SDL_Log("CB2_SetUpIntro state 2 -> CB2_Intro");
-        BlendPalettes(PALETTES_ALL, 16, RGB_BLACK);
-        SetMainCallback2(CB2_Intro);
-        SetVBlankCallback(VBlankCB_Intro);
+        SDL_Log("CB2_SetUpIntro state 2 -> CB2_InitTitleScreen");
+        SetMainCallback2(CB2_InitTitleScreen);
         return;
     }
 }
