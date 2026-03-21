@@ -64,3 +64,24 @@ void LZDecompressVram(const void *src, void *dest)
 }
 
 #endif // PLATFORM_PC
+
+// These are needed for sprite loading
+u16 LoadCompressedSpriteSheet(const struct CompressedSpriteSheet *src)
+{
+    struct SpriteSheet dest;
+    LZ77UnCompWram(src->data, gDecompressionBuffer);
+    dest.data = gDecompressionBuffer;
+    dest.size = src->size;
+    dest.tag = src->tag;
+    return LoadSpriteSheet(&dest);
+}
+
+void LoadCompressedSpritePalette(const struct CompressedSpritePalette *src)
+{
+    struct SpritePalette dest;
+    LZ77UnCompWram(src->data, gDecompressionBuffer);
+    dest.data = (void *)gDecompressionBuffer;
+    dest.tag = src->tag;
+    LoadSpritePalette(&dest);
+}
+

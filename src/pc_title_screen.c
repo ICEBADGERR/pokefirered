@@ -98,6 +98,7 @@ static void Task_TitleScreenTimer(u8 taskId) {}
 static void CB2_TitleScreenRun(void);
 
 extern void PC_RenderFrame(void);
+extern int gPC_RenderEnabled;
 
 static void CB2_TitleScreenRun(void)
 {
@@ -105,11 +106,12 @@ static void CB2_TitleScreenRun(void)
     AnimateSprites();
     BuildOamBuffer();
     UpdatePaletteFade();
-    PC_RenderFrame();
 }
 
 void CB2_InitTitleScreen(void)
 {
+    static int callCount = 0;
+    SDL_Log("CB2_InitTitleScreen called! count=%d state=%d", ++callCount, gMain.state);
     switch (gMain.state)
     {
     default:
@@ -142,6 +144,21 @@ void CB2_InitTitleScreen(void)
         PC_LoadPalFile("graphics/title_screen/firered/background.gbapal", 15 * 16);
         PC_LoadTiles("graphics/title_screen/copyright_press_start.4bpp.lz", 2);
         PC_LoadTilemap("graphics/title_screen/copyright_press_start.bin.lz", 2);
+        // Verify tilemap landed correctly
+        {
+            u16 *check = (u16 *)(gVRAM + 29 * 0x800);
+            SDL_Log("RIGHT AFTER LOAD: BG2 tilemap[0]=%04X [581]=%04X [582]=%04X",
+                check[0], check[581], check[582]);
+        }
+        // Debug BG2
+        {
+            u8 *cb2 = gVRAM + 0x8000;
+            u16 *sb29 = (u16 *)(gVRAM + 0xE800);
+            int nz = 0;
+            for (int ii = 0; ii < 2048; ii++) if (cb2[ii]) nz++;
+            SDL_Log("BG2 charBase non-zero: %d/2048, screenBase[0]=%04X [30*32+5]=%04X", 
+                nz, sb29[0], sb29[30*32+5]);
+        }
         // BG3 - Border - palette 14
         PC_LoadPalFile("graphics/title_screen/firered/background.gbapal", 14 * 16);
         PC_LoadTiles("graphics/title_screen/border_bg.4bpp.lz", 3);
@@ -156,6 +173,7 @@ void CB2_InitTitleScreen(void)
         BlendPalettes(PALETTES_BG, 16, RGB_BLACK);
         CreateTask(Task_TitleScreenMain, 4);
         SetVBlankCallback(VBlankCB);
+        gPC_RenderEnabled = 1;
         SetMainCallback2(CB2_TitleScreenRun);
         return;
     }

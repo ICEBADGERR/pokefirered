@@ -32,6 +32,7 @@ u8 gPLTT[0x400]   = {0};
 #define SCALE      3
 
 SDL_Window   *gWindow   = NULL;
+int gPC_RenderEnabled = 0;
 SDL_Renderer *gRenderer = NULL;
 SDL_Texture  *gTexture  = NULL;
 
@@ -106,7 +107,8 @@ int main(int argc, char *argv[])
         // Tick the game state machine
         PC_RunFrame();
         PC_CallCallbacks();
-        PC_RenderFrame();
+        if (gPC_RenderEnabled)
+            PC_RenderFrame();
 
         RenderFramebuffer();
         SDL_Delay(16);
