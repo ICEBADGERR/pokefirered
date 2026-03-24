@@ -1,6 +1,10 @@
 #ifdef PLATFORM_PC
 
 #include <SDL2/SDL.h>
+#ifdef USE_OPENGL
+#include <GL/glew.h>
+#include <SDL2/SDL_opengl.h>
+#endif
 #include "pc_port.h"
 #include "main.h"
 #include "malloc.h"
@@ -33,6 +37,10 @@ u8 gPLTT[0x400]   = {0};
 
 SDL_Window   *gWindow   = NULL;
 int gPC_RenderEnabled = 0;
+#ifdef USE_OPENGL
+SDL_GLContext gGLContext = NULL;
+void PC_GL_Init(SDL_Window *window);
+#endif
 SDL_Renderer *gRenderer = NULL;
 SDL_Texture  *gTexture  = NULL;
 
@@ -72,6 +80,31 @@ int main(int argc, char *argv[])
 {
     SDL_Init(SDL_INIT_VIDEO);
 
+#ifdef USE_OPENGL
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+    gWindow = SDL_CreateWindow(
+        "Pokemon FireRed PC",
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        GBA_WIDTH * SCALE, GBA_HEIGHT * SCALE,
+        SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL
+    );
+
+    gGLContext = SDL_GL_CreateContext(gWindow);
+    SDL_GL_SetSwapInterval(1); // vsync
+
+    glewExperimental = GL_TRUE;
+    GLenum err = glewInit();
+    if (err != GLEW_OK)
+        SDL_Log("GLEW error: %s", glewGetErrorString(err));
+
+    PC_GL_Init(gWindow);
+    SDL_Log("OpenGL version: %s", glGetString(GL_VERSION));
+    SDL_Log("GPU: %s", glGetString(GL_RENDERER));
+#else
     gWindow = SDL_CreateWindow(
         "Pokemon FireRed PC",
         SDL_WINDOWPOS_CENTERED,
@@ -89,6 +122,7 @@ int main(int argc, char *argv[])
         SDL_TEXTUREACCESS_STREAMING,
         GBA_WIDTH, GBA_HEIGHT
     );
+#endif
 
     // Initialize the game callback system
     InitHeap(gHeap, HEAP_SIZE);
@@ -108,14 +142,25 @@ int main(int argc, char *argv[])
         PC_RunFrame();
         PC_CallCallbacks();
         if (gPC_RenderEnabled)
+        {
             PC_RenderFrame();
+#ifdef USE_OPENGL
+            SDL_GL_SwapWindow(gWindow);
+#else
+            RenderFramebuffer();
+#endif
+        }
 
         RenderFramebuffer();
         SDL_Delay(16);
     }
 
+#ifdef USE_OPENGL
+    SDL_GL_DeleteContext(gGLContext);
+#else
     SDL_DestroyTexture(gTexture);
     SDL_DestroyRenderer(gRenderer);
+#endif
     SDL_DestroyWindow(gWindow);
     SDL_Quit();
     return 0;

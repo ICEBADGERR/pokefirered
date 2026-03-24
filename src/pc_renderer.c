@@ -1,4 +1,5 @@
 #ifdef PLATFORM_PC
+#ifndef USE_OPENGL
 
 #include "global.h"
 #include "palette.h"
@@ -186,4 +187,5 @@ void PC_RenderFrame(void)
     PC_RenderSprites();       // Sprites on top
 }
 
+#endif // USE_OPENGL
 #endif // PLATFORM_PC
